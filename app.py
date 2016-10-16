@@ -256,9 +256,6 @@ def parsing_message(sender_id , message):
     dc_re_1=re.search(r'dc', message , re.IGNORECASE)
     dc_re_2=re.search(r'hub', message , re.IGNORECASE)
     dc_re_3=re.search(r'add', message , re.IGNORECASE)
-    # Open source regex
-    open_source_1 = re.search(r'open source', message, re.IGNORECASE)
-    open_source_2 = re.search(r'opensource', message, re.IGNORECASE)
     Flag=redis_database.get(sender_id)
     log("The value of flag is :{}".format(Flag))
     if Flag == 'DI' : #this means the user is faceing development issue and has replied with his/her query
@@ -291,16 +288,6 @@ def parsing_message(sender_id , message):
         except KeyError: 
             msg = "The current hub address is {}".format(hub_address)
         send_message(sender_id, msg)
-    elif open_source_1 or open_source_2:
-        try:
-            msg = "Hey {} ! Here are some links that will help you get started.\n".format(
-                user_details['first_name']) + "https://opensource.com/resources/what-open-source\n" + \
-                "http://www.erikaheidi.com/blog/a-beginners-guide-to-open-source-making-your-first-contribution"
-        except KeyError:
-            msg = "Hey! Here are some links that will help you get started.\n" + \
-                "https://opensource.com/resources/what-open-source\n" + \
-                "http://www.erikaheidi.com/blog/a-beginners-guide-to-open-source-making-your-first-contribution"
-        send_message(sender_id, msg)    
     else :
         msg = apiai_call(message)
         send_message(sender_id, msg)
