@@ -12,9 +12,9 @@ from dc_hub import get_hub_add
 import SO_scrapper
 import upcomingevents
 app = Flask(__name__)
-url = urlparse.urlparse(os.environ.get('REDISCLOUD_URL'))
-redis_database = redis.Redis(
-    host=url.hostname, port=url.port, password=url.password)
+#url = urlparse.urlparse(os.environ.get('REDISCLOUD_URL'))
+#redis_database = redis.Redis(
+ #   host=url.hostname, port=url.port, password=url.password)
 
 
 @app.route('/', methods=['GET'])
@@ -302,14 +302,19 @@ def get_user(sender_id):
 
 
 def parsing_message(sender_id, message):
-    user_details = get_user(sender_id)  # getting user details
-    # gsco re's
+    # Getting user details
+    user_details = get_user(sender_id)
+    # GSoC regex search
     gsoc_re_1 = re.search(r'gsoc', message, re.IGNORECASE)
     gsoc_re_2 = re.search(r'google summer of code', message, re.IGNORECASE)
-    # dc re's
+    # DC hub regex search
     dc_re_1 = re.search(r'dc', message, re.IGNORECASE)
     dc_re_2 = re.search(r'hub', message, re.IGNORECASE)
     dc_re_3 = re.search(r'add', message, re.IGNORECASE)
+    # Open source regex
+    open_source_1 = re.search(r'open source', message, re.IGNORECASE)
+    open_source_2 = re.search(r'opensource', message, re.IGNORECASE)
+
     Flag = redis_database.get(sender_id)
     log("The value of flag is :{}".format(Flag))
     # this means the user is faceing development issue and has replied with
@@ -346,6 +351,16 @@ def parsing_message(sender_id, message):
                 user_details['first_name'], hub_address)
         except KeyError:
             msg = "The current hub address is {}".format(hub_address)
+        send_message(sender_id, msg)
+    elif open_source_1 or open_source_2:
+        try:
+            msg = "Hey {} ! Here are some links that will help you get started.\n".format(
+                user_details['first_name']) + "https://opensource.com/resources/what-open-source\n" + \
+                "http://www.erikaheidi.com/blog/a-beginners-guide-to-open-source-making-your-first-contribution"
+        except KeyError:
+            msg = "Hey! Here are some links that will help you get started.\n" + \
+                "https://opensource.com/resources/what-open-source\n" + \
+                "http://www.erikaheidi.com/blog/a-beginners-guide-to-open-source-making-your-first-contribution"
         send_message(sender_id, msg)
     else:
         msg = apiai_call(message)
